@@ -5,128 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Player - GitHub Pages</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
+            color: #333;
         }
+        
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
-            border-radius: 15px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        }
-        h1 {
             text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 2.5em;
         }
-        .input-group {
+        
+        .header h1 {
+            font-size: 2.2em;
+            margin-bottom: 10px;
+        }
+        
+        .player-section {
+            padding: 30px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%;
+            margin-bottom: 25px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .controls {
             display: flex;
             gap: 15px;
-            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
         }
+        
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .instances {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .instance-btn {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .instance-btn:hover {
+            border-color: #667eea;
+            background: #e9ecef;
+        }
+        
+        .instance-btn.active {
+            border-color: #ff6b6b;
+            background: #fff0f0;
+        }
+        
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
         input {
             flex: 1;
-            padding: 15px;
-            border: 2px solid #e1e5e9;
-            border-radius: 10px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
         }
+        
         input:focus {
             outline: none;
             border-color: #667eea;
         }
-        button {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        button:hover {
-            transform: translateY(-2px);
-        }
-        #player {
-            width: 100%;
-            height: 600px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            margin-bottom: 20px;
-        }
-        .examples {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-        .example-btn {
-            padding: 8px 15px;
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .example-btn:hover {
-            background: #667eea;
-            color: white;
-        }
-        .status {
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 YouTube Player</h1>
-        
-        <div class="input-group">
-            <input type="text" id="videoUrl" 
-                   placeholder="Вставьте ссылку YouTube (например: https://www.youtube.com/watch?v=dQw4w9WgXcQ)" 
-                   value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
-            <button onclick="loadVideo()">🎥 Смотреть</button>
+        <div class="header">
+            <h1>🎬 YouTube Player</h1>
+            <p>Работает через GitHub Pages + Invidious</p>
         </div>
         
-        <div id="status"></div>
-        
-        <div id="player">
-            <!-- Видео будет здесь -->
-        </div>
-        
-        <div class="examples">
-            <strong>Примеры: </strong>
-            <span class="example-btn" onclick="setExample('dQw4w9WgXcQ')">🎵 Rick Astley</span>
-            <span class="example-btn" onclick="setExample('kJQP7kiw5Fk')">💃 Despacito</span>
-            <span class="example-btn" onclick="setExample('jNQXAC9IVRw')">📹 Первое видео YouTube</span>
-            <span class="example-btn" onclick="setExample('9bZkp7q19f0')">🕺 Gangnam Style</span>
+        <div class="player-section">
+            <div class="input-group">
+                <input type="text" id="videoUrl" 
+                       placeholder="Вставьте YouTube ссылку" 
+                       value="https://www.youtube.com/watch?v=JuZBZV3Hi4E">
+                <button class="btn btn-primary" onclick="loadVideo()">Смотреть</button>
+            </div>
+            
+            <div id="status" class="status success">
+                ✅ Готов к работе! Выберите инстанс или нажмите "Смотреть"
+            </div>
+            
+            <div class="video-container">
+                <div id="player" style="
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 100%; height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: #000;
+                    color: white;
+                    font-size: 18px;
+                ">
+                    Видео появится здесь после загрузки...
+                </div>
+            </div>
+            
+            <h3 style="text-align: center; margin: 20px 0 10px 0;">🚀 Invidious инстансы:</h3>
+            <div class="instances">
+                <div class="instance-btn active" onclick="switchInstance('yewtu.be')">yewtu.be 🇫🇮</div>
+                <div class="instance-btn" onclick="switchInstance('invidious.flokinet.to')">flokinet 🇷🇴</div>
+                <div class="instance-btn" onclick="switchInstance('inv.riverside.rocks')">riverside 🇺🇸</div>
+                <div class="instance-btn" onclick="switchInstance('invidious.xyz')">invidious.xyz 🇺🇸</div>
+                <div class="instance-btn" onclick="switchInstance('yt.artemislena.eu')">artemislena 🇩🇪</div>
+                <div class="instance-btn" onclick="switchInstance('invidious.namazso.eu')">namazso 🇩🇪</div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-primary" onclick="loadVideo()">🔄 Перезагрузить видео</button>
+                <button class="btn" onclick="openOriginal()" style="background: #6c757d; color: white;">🔗 Открыть на YouTube</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // URL вашего CloudFlare Worker (замените на свой)
-        const WORKER_URL = 'freetube.sasha35fedorov.workers.dev';
+        // Рабочие Invidious инстансы
+        const instances = [
+            'yewtu.be',
+            'invidious.flokinet.to',
+            'inv.riverside.rocks', 
+            'invidious.xyz',
+            'yt.artemislena.eu',
+            'invidious.namazso.eu',
+            'invidious.privacydev.net',
+            'y.com.sb'
+        ];
         
-        function showStatus(message, type) {
+        let currentInstance = 'yewtu.be';
+        
+        function showStatus(message, type = 'success') {
             const statusEl = document.getElementById('status');
-            statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
-            setTimeout(() => statusEl.innerHTML = '', 3000);
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+        
+        function switchInstance(instance) {
+            currentInstance = instance;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.instance-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            showStatus(`✅ Переключено на: ${instance}`);
+            loadVideo();
         }
         
         function getVideoId(url) {
@@ -143,49 +254,82 @@
             return null;
         }
         
-        async function loadVideo() {
+        function loadVideo() {
             const url = document.getElementById('videoUrl').value;
             const videoId = getVideoId(url);
             
             if (!videoId) {
-                showStatus('❌ Неверная ссылка YouTube!', 'error');
+                showStatus('❌ Ошибка: Неверная ссылка YouTube', 'error');
                 return;
             }
             
-            try {
-                showStatus('🔄 Загружаем видео...', 'success');
-                
-                // Используем CloudFlare Worker как прокси
-                const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-                const proxyUrl = `${WORKER_URL}/proxy?url=${encodeURIComponent(embedUrl)}`;
-                
-                document.getElementById('player').innerHTML = `
-                    <iframe width="100%" height="100%" 
-                            src="${proxyUrl}"
-                            frameborder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                            allowfullscreen>
-                    </iframe>
-                `;
-                
-                showStatus('✅ Видео загружено!', 'success');
-            } catch (error) {
-                showStatus('❌ Ошибка загрузки: ' + error.message, 'error');
-            }
+            showStatus('🔄 Загружаем видео...', 'success');
+            
+            const embedUrl = `https://${currentInstance}/embed/${videoId}?autoplay=1&quality=hd720`;
+            
+            document.getElementById('player').innerHTML = `
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="${embedUrl}"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen
+                    title="YouTube Video Player">
+                </iframe>
+            `;
+            
+            // Проверяем загрузку
+            setTimeout(() => {
+                const iframe = document.querySelector('iframe');
+                if (iframe && iframe.src) {
+                    showStatus(`✅ Видео загружено через ${currentInstance}`, 'success');
+                } else {
+                    showStatus('⚠️ Пробуем другой инстанс...', 'error');
+                    tryNextInstance();
+                }
+            }, 2000);
         }
         
-        function setExample(videoId) {
-            document.getElementById('videoUrl').value = `https://www.youtube.com/watch?v=${videoId}`;
+        function tryNextInstance() {
+            const currentIndex = instances.indexOf(currentInstance);
+            const nextIndex = (currentIndex + 1) % instances.length;
+            currentInstance = instances[nextIndex];
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.instance-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent.includes(currentInstance)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            showStatus(`🔄 Пробуем: ${currentInstance}`);
             loadVideo();
         }
         
-        // Автозагрузка при Enter
+        function openOriginal() {
+            const url = document.getElementById('videoUrl').value;
+            const videoId = getVideoId(url);
+            if (videoId) {
+                window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank');
+            }
+        }
+        
+        // Автозагрузка при старте
+        window.onload = function() {
+            showStatus('🎯 Загружаем видео...');
+            
+            // Автозагрузка через 1 секунду
+            setTimeout(() => {
+                loadVideo();
+            }, 1000);
+        };
+        
+        // Загрузка по Enter
         document.getElementById('videoUrl').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') loadVideo();
         });
-        
-        // Загружаем первое видео при запуске
-        window.onload = loadVideo;
     </script>
 </body>
 </html>
