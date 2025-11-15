@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Player - GitHub Pages</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .input-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+        }
+        #player {
+            width: 100%;
+            height: 600px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        .examples {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .example-btn {
+            padding: 8px 15px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .example-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 YouTube Player</h1>
+        
+        <div class="input-group">
+            <input type="text" id="videoUrl" 
+                   placeholder="Вставьте ссылку YouTube (например: https://www.youtube.com/watch?v=dQw4w9WgXcQ)" 
+                   value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+            <button onclick="loadVideo()">🎥 Смотреть</button>
+        </div>
+        
+        <div id="status"></div>
+        
+        <div id="player">
+            <!-- Видео будет здесь -->
+        </div>
+        
+        <div class="examples">
+            <strong>Примеры: </strong>
+            <span class="example-btn" onclick="setExample('dQw4w9WgXcQ')">🎵 Rick Astley</span>
+            <span class="example-btn" onclick="setExample('kJQP7kiw5Fk')">💃 Despacito</span>
+            <span class="example-btn" onclick="setExample('jNQXAC9IVRw')">📹 Первое видео YouTube</span>
+            <span class="example-btn" onclick="setExample('9bZkp7q19f0')">🕺 Gangnam Style</span>
+        </div>
+    </div>
+
+    <script>
+        // URL вашего CloudFlare Worker (замените на свой)
+        const WORKER_URL = 'https://your-worker-name.your-subdomain.workers.dev';
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = `<div class="status ${type}">${message}</div>`;
+            setTimeout(() => statusEl.innerHTML = '', 3000);
+        }
+        
+        function getVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/,
+                /youtube\.com\/watch\?v=([^"&?\/\s]{11})/,
+                /youtu\.be\/([^"&?\/\s]{11})/
+            ];
+            
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) return match[1];
+            }
+            return null;
+        }
+        
+        async function loadVideo() {
+            const url = document.getElementById('videoUrl').value;
+            const videoId = getVideoId(url);
+            
+            if (!videoId) {
+                showStatus('❌ Неверная ссылка YouTube!', 'error');
+                return;
+            }
+            
+            try {
+                showStatus('🔄 Загружаем видео...', 'success');
+                
+                // Используем CloudFlare Worker как прокси
+                const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+                const proxyUrl = `${WORKER_URL}/proxy?url=${encodeURIComponent(embedUrl)}`;
+                
+                document.getElementById('player').innerHTML = `
+                    <iframe width="100%" height="100%" 
+                            src="${proxyUrl}"
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                `;
+                
+                showStatus('✅ Видео загружено!', 'success');
+            } catch (error) {
+                showStatus('❌ Ошибка загрузки: ' + error.message, 'error');
+            }
+        }
+        
+        function setExample(videoId) {
+            document.getElementById('videoUrl').value = `https://www.youtube.com/watch?v=${videoId}`;
+            loadVideo();
+        }
+        
+        // Автозагрузка при Enter
+        document.getElementById('videoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loadVideo();
+        });
+        
+        // Загружаем первое видео при запуске
+        window.onload = loadVideo;
+    </script>
+</body>
+</html>
